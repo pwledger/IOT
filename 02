@@ -1,0 +1,62 @@
+#include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
+
+#define FIREBASE_HOST "find-d0799-default-rtdb.firebaseio.com/" // 주소
+#define FIREBASE_AUTH "sKQqNByRjzaqQPgLjYgBMSjl56Bo4yedUHUeif7N"           // 키
+#define WIFI_SSID "coding"                                                 //학원 와이파이 이름
+#define WIFI_PASSWORD  "coding12345"                                       //학원 비번
+
+FirebaseData firebaseData;
+
+#include<Servo.h> //Servo 라이브러리를 추가
+Servo servo;      //Servo 클래스로 servo객체 생성
+int value = 0; 
+
+
+#include <Adafruit_NeoPixel.h>
+Adafruit_NeoPixel led3 = Adafruit_NeoPixel(8,D6, NEO_GRB + NEO_KHZ800); 
+//(개수, 연결한 핀 , 네오픽셀 종류)
+
+void setup() {
+
+  led3.begin();
+  led3.setBrightness(100);                
+  led3.clear();
+
+  for(int i = 0 ; i < 8 ; i++){
+    led3.setPixelColor(i , led3.Color(255,0,0));
+  }
+  led3.show();
+
+  servo.attach(D7);
+
+  Serial.begin(115200);
+  WiFi.begin(WIFI_SSID ,WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED){
+    Serial.print(" . ");
+    delay(300);
+  }
+  Serial.println(WiFi.localIP());
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+
+}
+
+void loop() {
+
+  delay(1000);
+  if (Firebase.getString(firebaseData , "/esp8266/count")) {
+
+    String charValue = firebaseData.stringData();
+    Serial.println(charValue);
+    if (charValue == "1"){
+      servo.write(180);
+    }
+    if (charValue == "0"){
+      servo.write(0);
+    }
+  }
+  else {
+    Serial.println("not answer");
+  }
+
+}
