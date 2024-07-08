@@ -32,8 +32,8 @@ void loop() {
   delay(1000);
   if (Firebase.getString(firebaseData , "/esp8266/count")) {
 
-    String charValue = firebaseData.stringData();
-    Serial.println(charValue);
+    String colorString = firebaseData.stringData();
+    Serial.println(colorString);
 
       // RGB 값을 리스트로 변환
       int rgbValues[3];
