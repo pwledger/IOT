@@ -1,0 +1,56 @@
+#include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
+
+#define FIREBASE_HOST "find-d0799-default-rtdb.firebaseio.com/"            // 주소
+#define FIREBASE_AUTH "sKQqNByRjzaqQPgLjYgBMSjl56Bo4yedUHUeif7N"           // 키
+#define WIFI_SSID "coding"                                                 //학원 와이파이 이름
+#define WIFI_PASSWORD  "coding12345"                                       //학원 비번
+
+FirebaseData firebaseData;
+
+#define echo D6
+#define trig D7
+
+void setup() {
+
+  pinMode(echo , INPUT);
+  pinMode(trig , OUTPUT);
+  
+  Serial.begin(115200);
+  WiFi.begin(WIFI_SSID ,WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED){
+    Serial.print(" . ");
+    delay(300);
+  }
+  Serial.println(WiFi.localIP());
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+}
+
+void loop() {
+
+  digitalWrite(trig ,HIGH);
+  delay(10);
+  digitalWrite(trig , LOW);
+
+  float duration = pulseIn(echo , HIGH);               //음파가 발사되고 돌아오는 시간
+  float distance = ((float) duration * 340 )/10000/2;  // 거리
+
+  delay(1000);
+
+  String path = "/esp8266/dis"; // Path in your Firebase database
+  String message = string(distance);
+
+  if (Firebase.setString(firebaseData, path, message)) {
+    Serial.println("Data written successfully");
+  }
+
+  if (Firebase.getString(firebaseData , path)) {
+
+    String dis = firebaseData.stringData();
+    Serial.println(dis);
+  }
+  else{
+    Serial.println("not answer");
+  }
+
+}
