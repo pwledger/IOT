@@ -1,0 +1,60 @@
+import tkinter as tk
+from tkinter import messagebox
+
+원소 = ["물", "불", "공기", "바람", "흙"]
+조합 = []
+
+def 안내():
+    s = "내가 가지고 있는 원소: "
+    for idx, elem in enumerate(원소, start=1):
+        s += f"{idx}: {elem} , "
+    안내라벨.config(text=s.strip(', '))
+
+def 조합안내():
+    s1 = "조합 대상: "
+    for i in 조합:
+        s1 += f"{i}+"
+    조합라벨.config(text=s1.strip('+'))
+
+def 원소추가(n):
+    if 0 < n <= len(원소):
+        조합.append(원소[n-1])
+        조합안내()
+
+def 조합완료():
+    global 조합
+    s1 = "조합 대상: " + "+".join(조합) + "+"
+    if s1 == "조합 대상: 물+불+":
+        원소.append("수증기")
+        messagebox.showinfo("조합 결과", "조합 되었습니다: 수증기")
+    elif s1 == "조합 대상: 불+흙+":
+        원소.append("벽돌")
+        messagebox.showinfo("조합 결과", "조합 되었습니다: 벽돌")
+    else:
+        messagebox.showinfo("조합 결과", "조합 실패")
+    조합 = []
+    안내()
+    조합안내()
+
+# GUI 설정
+root = tk.Tk()
+root.title("원소 조합기")
+
+안내라벨 = tk.Label(root, text="")
+안내라벨.pack()
+
+조합라벨 = tk.Label(root, text="조합 대상: ")
+조합라벨.pack()
+
+안내()
+
+button_font = ("Arial", 20)  # 버튼 글씨를 크게 설정
+
+for idx, elem in enumerate(원소, start=1):
+    btn = tk.Button(root, text=elem, command=lambda n=idx: 원소추가(n), font=button_font)
+    btn.pack(side=tk.LEFT)
+
+조합버튼 = tk.Button(root, text="조합 완료", command=조합완료, font=button_font)
+조합버튼.pack(side=tk.RIGHT)
+
+root.mainloop()
