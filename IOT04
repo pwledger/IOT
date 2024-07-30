@@ -1,0 +1,65 @@
+#include <DHT11.h>
+DHT11 dht11(D5);
+
+#include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
+
+#define FIREBASE_HOST "find-d0799-default-rtdb.firebaseio.com/"            // 주소
+#define FIREBASE_AUTH "sKQqNByRjzaqQPgLjYgBMSjl56Bo4yedUHUeif7N"           // 키
+#define WIFI_SSID "coding"                                                 //학원 와이파이 이름
+#define WIFI_PASSWORD  "coding12345"                                       //학원 비번
+
+FirebaseData firebaseData;
+
+void setup() {
+  // 우리가 스마트 팜에 사용할 센서 (온습도 센서 , 빛 , 가스 , 토양)
+  pinMode(D3 , INPUT);
+  pinMode(D4 , INPUT);
+  pinMode(D5 , INPUT);
+
+  Serial.begin(115200);
+  WiFi.begin(WIFI_SSID ,WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED){
+    Serial.print(" . ");
+    delay(300);
+  }
+  Serial.println(WiFi.localIP());
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+}
+void loop() {
+
+  int light = analogRead(A0);
+  Serial.print("light : ");
+  Serial.println(light);
+
+  int temperature = 0;
+  int humidity = 0;
+  int result = dht11.readTemperatureHumidity(temperature, humidity);
+  if (result == 0) {
+      Serial.print("Temperature: ");
+      Serial.print(temperature);
+      Serial.print(" °C\tHumidity: ");
+      Serial.print(humidity);
+      Serial.println(" %");
+  } else {
+      Serial.println(DHT11::getErrorString(result));
+  }
+  delay(1000);
+  
+  // 기록 하기 
+  if (Firebase.setString(firebaseData, "/SMART_SUMIN/temperature", String(temperature) )) {
+    Serial.println("temperature written successfully");
+  }
+
+  if (Firebase.setString(firebaseData, "/SMART_SUMIN/humidity", String(humidity)   )) {
+    Serial.println("humidity written successfully");
+  }
+ 
+  if (Firebase.setString(firebaseData, "/SMART_SUMIN/light", String(light) )) {
+    Serial.println("light written successfully");
+  }
+
+}
+
+
+
