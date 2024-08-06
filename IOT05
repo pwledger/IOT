@@ -1,0 +1,34 @@
+#include <SoftwareSerial.h>
+SoftwareSerial bt(4,5);
+void setup() {
+  Serial.begin(9600);
+  bt.begin(9600);
+}
+boolean com = false;
+void loop() {
+
+  String s = "";
+  while (bt.available()) {
+    com = true;
+    char c = bt.read();
+    s += c;
+    if (c == "\n"){
+      break;
+    }
+    delay(5);
+  }
+  if (com){
+    s.replace("[", "");
+    s.replace("]", "");
+
+    int indexNumber = s.indexOf(',');
+
+    String id = s.substring(0, commaIndex1);
+    String pw = s.substring(commaIndex1 + 1);
+
+    Serial.pritln(id);
+    
+    com = false;
+  }
+
+}
