@@ -1,0 +1,40 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial bt(4,5);  // 4 tx , 5 rx
+
+void setup() {
+  bt.begin(9600);
+  Serial.begin(9600);
+}
+
+String s = "";
+String ip[2] = {"",""}; // id , pw 를 채워 줄거야 
+
+void loop() {
+  if(Serial.available()) {
+    bt.write(Serial.read());
+  }
+  while (bt.available()){
+    char c =  (char) bt.read();
+    s += c;
+    delay(5);
+  }
+  if(s != ""){
+    Serial.println(s);
+    idpw(s , ip);
+    Serial.println(ip[0]);
+    s = "";
+  }
+}
+
+void idpw(String s , String* ip){
+  s.replace("[" , "");
+  s.replace("]" , "");
+  s.replace("\"" , "");
+  int comaNumber = s.indexOf(",");
+
+  ip[0] = s.substring(0,comaNumber);
+  ip[1] = s.substring(comaNumber+1);
+}
+
+
