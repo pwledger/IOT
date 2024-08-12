@@ -1,0 +1,82 @@
+#include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
+
+#include <SoftwareSerial.h>
+
+SoftwareSerial bt(D6,D7);  // 4 tx , 5 rx
+FirebaseData firebaseData;
+// wifi 연결
+
+
+void setup() {
+  bt.begin(9600);
+  Serial.begin(9600);
+}
+
+String s = "";
+String ip[2] = {"",""}; // id , pw 를 채워 줄거야 
+
+void loop() {
+  if(Serial.available()) {
+    bt.write(Serial.read());
+  }
+  while (bt.available()){
+    char c =  (char) bt.read();
+    if (c != '\n'){
+      s += c;
+    }
+    delay(5);
+  }
+  if(s != ""){
+    Serial.println(s);
+    idpw(s , ip);
+    if( wifiConnect(ip[0],ip[1])) bt.write("wificonnect");
+    else bt.write("id and pw check not connect");
+    s = "";
+  }
+
+  if(WiFi.status() == WL_CONNECTED){
+    // 기록 하기 
+    if (Firebase.setString(firebaseData, "/SMART_HOME/temperature", String("54") )) {
+      Serial.println("temperature written successfully");
+    }
+
+    if (Firebase.setString(firebaseData, "/SMART_HOME/humidity", String("45")   )) {
+      Serial.println("humidity written successfully");
+    }
+  }
+}
+// wifi 연결
+boolean wifiConnect(String id,String pw){
+  WiFi.disconnect();
+  #define FIREBASE_HOST "find-d0799-default-rtdb.firebaseio.com/"            // 주소
+  #define FIREBASE_AUTH "sKQqNByRjzaqQPgLjYgBMSjl56Bo4yedUHUeif7N"           // 키
+  WiFi.begin(id , pw );
+  Serial.print(id);
+  Serial.print(pw);
+  int retryCount = 0;
+  while (WiFi.status() != WL_CONNECTED && retryCount < 10) {
+    delay(500);
+    Serial.print(".");
+    retryCount++;
+  }
+  if (WiFi.status() == WL_CONNECTED){
+    Serial.println(WiFi.localIP());
+    Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+
+void idpw(String s , String* ip){
+  s.replace("[" , "");
+  s.replace("]" , "");
+  s.replace("\"" , "");
+  int comaNumber = s.indexOf(",");
+
+  ip[0] = s.substring(0,comaNumber);
+  ip[1] = s.substring(comaNumber+1);
+}
