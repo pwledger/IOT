@@ -1,0 +1,85 @@
+#include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
+
+#include <SoftwareSerial.h>
+#include <DHT11.h>
+DHT11 dht11(D5);
+
+SoftwareSerial bt(D6,D7);  // 6 tx , 7 rx
+FirebaseData firebaseData;
+
+void setup() {  // 처음 시작되는 부분 통신 속도를 정한다
+  bt.begin(9600);
+  Serial.begin(9600);
+}
+
+String s = "";
+String ip[2] = {"w","p"}; // id , pw 를 채워 줄거야 , 글자리스트 2개의 공간을 사용 할거야
+int temperature = 0;
+int humidity = 0;
+void loop() {
+  if(Serial.available()) {  // 시리얼 통신이 가능 할 때 (시리얼 모니터에 무엇인가 적을 때)
+    bt.write(Serial.read()); // 시리얼한테 읽어 온걸 블루트스 한테 써준다
+  }
+
+  while (bt.available()){        //블루투스로 부터 받는 데이터가 있을 때 
+    char c =  (char) bt.read();  //한글자 식 읽어 옴
+    if (c != '\n'){              //글자가 끝나지 않았을 때
+      s += c;                    //s 라는 문자열에 한글자씩 더해줍니다
+    }
+    delay(5);                   // 기다리기 0.005초
+  }
+  if(s != ""){                  //  s값이 빈칸이 아닐때 
+    Serial.println(s);          // s값 출력
+    idpw(s , ip);               // 함수동작 : s 값을 ip[0] 에는 id 값을 저장 , ip[1] 에는 pw 값을 저장
+    if( wifiConnect(ip[0],ip[1])) bt.write("wificonnect");   //함수 동작 :  ip 값을 가지고 wifi 연결 참 > "wificonnect"
+    else bt.write("id and pw check not connect");   // 거짓 "id and pw check not connect"  블루투스 한테 써짐 (앱에표시)
+    s = "";
+  }
+
+  if(WiFi.status() == WL_CONNECTED){
+    int result = dht11.readTemperatureHumidity(temperature, humidity);
+    if (Firebase.setString(firebaseData, "/SMART_HOME/temperature", String(temperature) )) {
+      Serial.println("temperature written successfully");
+    }
+
+    if (Firebase.setString(firebaseData, "/SMART_HOME/humidity", String(humidity)   )) {
+      Serial.println("humidity written successfully");
+    }
+    delay(1000);
+  }
+}
+// wifi 연결
+boolean wifiConnect(String id,String pw){
+  WiFi.disconnect();
+  #define FIREBASE_HOST "find-d0799-default-rtdb.firebaseio.com/"            // 주소
+  #define FIREBASE_AUTH "sKQqNByRjzaqQPgLjYgBMSjl56Bo4yedUHUeif7N"           // 키
+  WiFi.begin(id , pw );
+  Serial.print(id);
+  Serial.print(pw);
+  int retryCount = 0;
+  while (WiFi.status() != WL_CONNECTED && retryCount < 10) {
+    delay(500);
+    Serial.print(".");
+    retryCount++;
+  }
+  if (WiFi.status() == WL_CONNECTED){
+    Serial.println(WiFi.localIP());
+    Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+
+void idpw(String s , String* ip){
+  s.replace("[" , "");
+  s.replace("]" , "");
+  s.replace("\"" , "");
+  int comaNumber = s.indexOf(",");
+
+  ip[0] = s.substring(0,comaNumber);
+  ip[1] = s.substring(comaNumber+1);
+}
