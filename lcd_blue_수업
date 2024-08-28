@@ -1,0 +1,33 @@
+#include <SoftwareSerial.h>
+#include<LiquidCrystal_I2C_Hangul.h>
+#include<Wire.h>
+LiquidCrystal_I2C_Hangul lcd(0x27,16,2); //LCD 클래스 초기화
+SoftwareSerial bt(4,5);  // 4 tx , 5 rx
+void setup() {
+  Serial.begin(9600);
+  bt.begin(9600);
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Hello World!");
+}
+String s = "";
+String rsp[3] = {"Scissors","Rock","Paper"}; // rsp[0] = scissors , rsp[1] = rock , rsp[2] = paper
+void loop() {
+  if(Serial.available()) {
+      bt.write(Serial.read());
+    }
+  while (bt.available() > 0 ){
+    char c = (char) bt.read();
+    if(c != '\n'){
+      s += c;
+    }
+    delay(5);
+  }
+  if(s != ""){
+    lcd.clear();
+    Serial.println(s);
+    int ai = random(1,4);
+
+    s = "";
+  }
+}
