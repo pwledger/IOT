@@ -46,6 +46,10 @@ void loop() {
     }
 
     if(s == "esc"){
+      if (Firebase.setString(firebaseData, "/SMART_HOME/wifi", "no" )) {
+        Serial.println("no");
+      }
+      delay(500);
       WiFi.disconnect();
       lcd.setCursor(0,0);
       lcd.print("new wifi please");
@@ -60,26 +64,15 @@ void loop() {
   if(WiFi.status() == WL_CONNECTED){
     lcd.setCursor(0,0);
     lcd.print("wifi connect");
-    if (Firebase.setString(firebaseData, "/SMART_HOME/temperature", String(temperature) )) {
-      Serial.println("temperature written successfully");
-    }
-
-    if (Firebase.setString(firebaseData, "/SMART_HOME/humidity", String(humidity)   )) {
-      Serial.println("humidity written successfully");
+    if (Firebase.setString(firebaseData, "/SMART_HOME/wifi", "ok" )) {
+      Serial.println("ok");
     }
   }
   else{
     lcd.setCursor(0,0);
     lcd.print("wifi not connect");
   }
-  lcd.setCursor(0,1);
-  lcd.print("t : ");
-  lcd.print(temperature);
-  lcd.print("c");
-  
-  lcd.print("h : ");
-  lcd.print(humidity);
-  lcd.print("%");
+ 
   delay(1000);
 
 }
