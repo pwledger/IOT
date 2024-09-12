@@ -23,8 +23,8 @@ void setup() {  // 처음 시작되는 부분 통신 속도를 정한다
 
 String s = "";
 String ip[2] = {"id","pw"}; // id , pw 를 채워 줄거야 , 글자리스트 2개의 공간을 사용 할거야
-int temperature = 0;
-int humidity = 0;
+//int temperature = 0;
+//int humidity = 0;
 void loop() {
   if(Serial.available()) {  // 시리얼 통신이 가능 할 때 (시리얼 모니터에 무엇인가 적을 때)
     bt.write(Serial.read()); // 시리얼한테 읽어 온걸 블루트스 한테 써준다
@@ -46,7 +46,7 @@ void loop() {
     }
 
     if(s == "esc"){
-      if (Firebase.setString(firebaseData, "/SMART_HOME/wifi", "no" )) {
+      if (Firebase.setString(firebaseData, "/SMART_HOME/wifi", "no" )) {  //여러분의 버킷으로 바꾸기
         Serial.println("no");
       }
       delay(500);
@@ -58,14 +58,18 @@ void loop() {
   }
 
   lcd.clear();
-  int result = dht11.readTemperatureHumidity(temperature, humidity);
+  //int result = dht11.readTemperatureHumidity(temperature, humidity);
 
 
   if(WiFi.status() == WL_CONNECTED){
     lcd.setCursor(0,0);
     lcd.print("wifi connect");
-    if (Firebase.setString(firebaseData, "/SMART_HOME/wifi", "ok" )) {
+    if (Firebase.setString(firebaseData, "/SMART_HOME/wifi", "ok" )) {  //여러분의 버킷으로 바꾸기
       Serial.println("ok");
+    }
+    if (Firebase.getString(firebaseData , "/SMART_HOME/sumin")) { //여러분의 버킷으로 바꾸기
+      String message = firebaseData.stringData();
+      Serial.println(message);
     }
   }
   else{
