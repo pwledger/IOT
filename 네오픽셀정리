@@ -1,0 +1,23 @@
+#include <Adafruit_NeoPixel.h>
+Adafruit_NeoPixel  neo = Adafruit_NeoPixel(8,D6, NEO_GRB + NEO_KHZ800);  // 개수 , 핀번호 ,네오픽셀종류
+
+void setup() {
+
+  neo.begin();
+  neo.setBrightness(100);                
+  neo.clear();
+
+  for(int i = 0 ; i < 8 ; i++){
+    neo.setPixelColor(i , neo.Color(255,0,0));  // 색정하기
+  }
+  neo.show();  // 보여주기
+  delay(1000);
+  neo.clear(); // 초기화하기
+
+}
+
+void loop() {
+
+
+}
+
