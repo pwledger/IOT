@@ -1,0 +1,20 @@
+#define echo D6
+#define trig D7
+
+void setup() {
+  pinMode(echo , INPUT);
+  pinMode(trig , OUTPUT);
+
+}
+
+void loop() {
+
+  digitalWrite(trig ,HIGH);
+  delay(10);
+  digitalWrite(trig , LOW);
+
+  float duration = pulseIn(echo , HIGH);               //음파가 발사되고 돌아오는 시간
+  float distance = ((float) duration * 340 )/10000/2;  // 거리
+
+}
+
